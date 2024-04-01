@@ -1,13 +1,13 @@
 board = arduino:avr:mega
 port = /dev/ttyACM0
 baud = 115200
-app = DAQ
+app = HX
 # NOT .cpp.extra_flags!
 printf_flags_option = compiler.c.elf.extra_flags
 printf_flags = -Wl,-u,vfprintf -lprintf_flt -lm
 def_flags_option = compiler.cpp.extra_flags
 def_flags = -DAPP_$(app)
-libraries = $(foreach lib,$(wildcard ./src/*),--library $(lib) )
+libraries = $(foreach lib,$(wildcard ./src/*/),--library $(lib) )
 
 all: 
 	arduino-cli compile -b $(board) \
