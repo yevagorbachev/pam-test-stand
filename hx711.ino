@@ -1,30 +1,10 @@
 #ifdef APP_HX
-#include <HX711.h>
-
-HX711 hx;
-
-const int PIN_HX_DOUT = 2;
-const int PIN_HX_SCK = 3;
-const float HX_SCALE = -2.32e5 / 2403;
-const int HX_OVERSAMPLE = 5;
 const uint8_t PIN_POT = A8;
 const uint8_t PIN_PRES = A15;
 
-linear_cal_t mv_to_psi = {
-	.min = 0.5e3,
-	.max = 4.5e3,
-	.range = 30,
-};
-
-linear_cal_t mv_to_mm = {
-	.min = 0e3,
-	.max = 5e3,
-	.range = 110,
-};
-
 analog_t pins[] = {
 	{.pin = PIN_POT, .cal = mv_to_mm, .ct = 0, .mv = 0, .value = 0},
-	{.pin = PIN_PRES, .cal = mv_to_psi, .ct = 0, .mv = 0, .value = 0}
+	{.pin = PIN_PRES, .cal = mv_to_psi_100, .ct = 0, .mv = 0, .value = 0}
 };
 
 void read_pins(void) {
@@ -36,10 +16,8 @@ void read_pins(void) {
 }
 
 void setup() {
-	Serial.begin(BAUD);
-	hx.begin(PIN_HX_DOUT, PIN_HX_SCK);
-	hx.tare();
-	hx.set_scale();
+	init_serial();
+	init_hx711();
 	uprintf(L_RAW, "Time\tLoad [ct]\tLoad [N]\tmm\tpsig\r\n");
 }
 
