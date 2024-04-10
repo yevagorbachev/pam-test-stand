@@ -6,7 +6,7 @@ app = ADS
 printf_flags_option = compiler.c.elf.extra_flags
 printf_flags = -Wl,-u,vfprintf -lprintf_flt -lm
 def_flags_option = compiler.cpp.extra_flags
-def_flags = -DAPP_$(app)
+def_flags = 
 
 src = $(wildcard ./src/*/)
 src_flag = $(foreach srcdir, $(src),--library $(srcdir) )
