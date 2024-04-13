@@ -14,8 +14,13 @@ all:
 		--build-property $(printf_flags_option)="$(printf_flags)" \
 		--build-property $(def_flags_option)="$(def_flags)" \
 		$(src_flag)
+
 flash: all
 	arduino-cli upload -p $(port) -b $(board) -v
 	make monitor
+
+sync:
+	cp data/* ~/.projects/mckibben/Data
+
 monitor:
 	minicom arduino

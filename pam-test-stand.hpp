@@ -32,3 +32,5 @@ const struct linear_cal mv_to_mm = {
 	.max = 5e3,
 	.range = 110,
 };
+
+const char START_TEST_CMD[] = "start";
