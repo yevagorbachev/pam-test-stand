@@ -20,7 +20,7 @@ flash: all
 	make monitor
 
 sync:
-	cp data/* ~/.projects/mckibben/Data
+	cp data/* ~/.projects/mckibben/Data -v
 
 monitor:
 	minicom arduino

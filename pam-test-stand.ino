@@ -42,10 +42,11 @@ void init_ads(void) {
 float posn;
 float pres;
 float load;
+static unsigned long t_start = 0;
 
 void read_chans(void) {
-	float T_0 = millis() / 1000.0;
-	uprintf(L_RAW, "%.3f", millis() / 1000.0);
+	float T = (millis() - t_start) / 1000.0;
+	uprintf(L_RAW, "%.3f", T);
 
 	/* ads.setCompareChannels(CHAN_LOAD);
 	load = 0;
@@ -66,11 +67,11 @@ void read_chans(void) {
 	posn = apply_cal(&mv_to_mm, posn);
 	uprintf(L_RAW, "\t%.2f", posn); */
 
-	uprintf(L_RAW, "\r");
+	uprintf(L_RAW, "\r\n");
 }
 
 // Fill and drain tests
-const float fill_time_s = 3;
+const float fill_time_s = 4;
 const float drain_time_s = 10;
 const float flush_time_s = 3;
 
@@ -96,44 +97,20 @@ void pwm_test(uint8_t duty) {
 		read_chans();
 	}
 	uprintf(L_EVENT, "Drain end\r\n");
-	analogWrite(PIN_OUTLET, 255);
-	delay(1000 * flush_time_s);
+	// analogWrite(PIN_OUTLET, 255);
+	// delay(1000 * flush_time_s);
 	analogWrite(PIN_OUTLET, 0);
-}
-
-int read_bytes_until(char* buf, size_t len, char until, int timeout) {
-	int ret;
-	int pos;
-	int now;
-	char rc;
-	
-	pos = 0;
-	now = millis();
-
-	while ((-1 == timeout) || (millis() - now < (1000 * timeout))) {
-		if (Serial.available() > 0) {
-			rc = Serial.read();
-			if ((until == rc) || (len == pos)) {
-				break;
-			}
-			buf[pos] = rc;
-			pos++;
-		}
-	}
-
-	return pos;
 }
 
 int read_compare(const char* ref, size_t len) {
 	int ret;
 	char buf[LINE_LENGTH];
 	Serial.flush();
-	uprintf(L_COMMENT, "Awaiting command <%s>\r\n", ref);
-	uprintf(L_COMMENT, "<");
-	ret = read_bytes_until(buf, sizeof(buf) - 1, '>', -1);
-
+	uprintf(L_COMMENT, "Awaiting command '%s'\r\n", ref);
+	uprintf(L_COMMENT, "");
+	ret = Serial.readBytesUntil('\r', buf, sizeof(buf) - 1);
 	buf[ret] = 0;
-	uprintf(L_COMMENT, "Acknowledged <%s>\r\n", buf);
+	uprintf(L_COMMENT, "Acknowledged '%s'\r\n", buf);
 
 	if (0 == ret) {
 		return -1;
@@ -146,20 +123,36 @@ int read_compare(const char* ref, size_t len) {
 	return ret;
 }
 
+enum TIM_PRESCALER {
+	TIM_31K = 1,
+	TIM_4K = 2,
+	TIM_490 = 3,
+	TIM_120 = 4,
+	TIM_30 = 5,
+	TIM_20 = 6,
+};
 
-const uint8_t pwm_sweep_start = 105;
+const uint8_t pwm_sweep_start = 10;
 const uint8_t pwm_sweep_step = 10;
-const uint8_t pwm_sweep_end = 255;
+const uint8_t pwm_sweep_end = 250;
 
 void setup() {
 	init_serial();
 	init_ads();
 
-	uprintf(L_RAW, "T_0 [s]\tP [psi]\r\n");
+	uprintf(L_RAW, "Time\tP\r\n");
+	uprintf(L_COMMENT, "[s]\t[psi]\r\n");
+
+	uint8_t eraser = 0b0000111;
+	enum TIM_PRESCALER speed = TIM_30;
+	TCCR3B &= ~eraser;
+	TCCR3B |= speed;
 
 	int ret = read_compare(START_TEST_CMD, sizeof(START_TEST_CMD));
 	if (0 == ret) {
-		delay(5 * 1000);
+		uprintf(L_COMMENT, "Command correct\r\n");
+		delay(3 * 1000);
+		t_start = millis();
 		for (uint8_t duty = pwm_sweep_start; 
 		   duty <= pwm_sweep_end; 
 		   duty += pwm_sweep_step) { 
@@ -169,8 +162,8 @@ void setup() {
 		uprintf(L_COMMENT, "Command incorrect: %d\r\n", ret);
 	}
 
+	
 }
 
 void loop() {
-	// read_chans();
 }
