@@ -15,6 +15,9 @@ all:
 		--build-property $(def_flags_option)="$(def_flags)" \
 		$(src_flag)
 
+clean: 
+	arduino-cli compile --clean
+
 flash: all
 	arduino-cli upload -p $(port) -b $(board) -v
 	make monitor

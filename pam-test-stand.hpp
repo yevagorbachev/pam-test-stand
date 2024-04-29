@@ -1,5 +1,4 @@
 #include <ADS1220_WE.h>
-#include <stdint.h>
 #include "src/arduino_printf/arduino_printf.hpp"
 #include "src/scheduler/scheduler.hpp"
 
@@ -10,17 +9,7 @@ struct linear_cal {
 };
 
 #define LINE_LENGTH 256
-#define BAUD 115200
-
-const uint8_t PIN_ADS_CS = 53;
-const uint8_t PIN_ADS_DRDY = 47;
-const enum ADS1220_MUX CHAN_LOAD = ADS1220_MUX_3_2;
-const enum ADS1220_MUX CHAN_POT = ADS1220_MUX_0_AVSS;
-const enum ADS1220_MUX CHAN_PRES = ADS1220_MUX_1_AVSS;
-
-const uint8_t PIN_OUTLET = 5;
-const uint8_t PIN_INLET = 4;
-
+#define BAUD 460800
 
 const struct linear_cal mv_to_100psi = {
 	.min = 0.5e3,
